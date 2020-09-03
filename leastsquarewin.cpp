@@ -4,11 +4,6 @@
 
 using namespace std;
 
-/*
-    通过最小二乘法求出 一元一次方程
-    若应用在k线中，则线将一个区域里的k线排序找出最小的几个值3-5，再将这几个点以此进行最小二乘法（2个点，3个点，4个点），
-    将得到的几条直线重新最小二乘法
-*/
 class LeastSquare{
 public:
     double a, b;
@@ -93,3 +88,52 @@ void LeastSquareWin::paintEvent(QPaintEvent *event)
 
     painter.drawPolyline(posList);
 }
+
+
+std::list<int> LeastSquareWin::findPeaks( const std::vector<double> &amp )
+{
+   const double NOISE = -1;               // Level up to and including which peaks will be excluded
+   int wideStart = -1;                 // The start of any current wide peak
+
+   int grad = -1;                      // Sign of gradient (almost)
+                                       //    =  1 for increasing
+                                       //    =  0 for level AND PREVIOUSLY INCREASING (so potential wide peak)
+                                       //    = -1 for decreasing OR level, but previously decreasing
+                                       // A sharp peak is identified by grad=1 -> grad=-1
+                                       // A wide  peak is identified by grad=0 -> grad=-1
+
+   std::list<int> peakIndexList;
+
+   for ( int i = 0; i < amp.size() - 1; i++ )
+   {
+      if ( amp[i+1] < amp[i] )         // Only possibility of a peak
+      {
+         if ( grad == 1 && amp[i] > NOISE )
+         {
+//            cout << "Sharp peak of " << amp[i] << " at i = " << i << '\n';
+            peakIndexList.push_back(i);
+         }
+         else if ( grad == 0 && amp[i] > NOISE )
+         {
+//            cout << "Wide peak of " << amp[i] << " from i = " << wideStart << " to " << i << '\n';
+            peakIndexList.push_back(i);
+         }
+         grad = -1;
+      }
+      else if ( amp[i+1] == amp[i] )   // Check for start of a wide peak
+      {
+         if ( grad == 1 )
+         {
+            wideStart = i;
+            grad = 0;
+         }
+      }
+      else
+      {
+         grad = 1;
+      }
+   }
+   qDebug() << "peakIndexList:" << peakIndexList;
+   return peakIndexList;
+}
+
