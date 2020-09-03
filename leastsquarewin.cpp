@@ -59,11 +59,17 @@ void LeastSquareWin::init()
         }
     }
 
+    std::pair<double,double> data = caclLeastSquare(mX,mY);
+    mA = data.first;
+    mB = data.second;
+
     LeastSquare ls(mX, mY);
     ls.print();
 
-    mA = ls.a;
-    mB = ls.b;
+    qDebug() << "ma:" << mA << " mb:" << mB;
+
+//    mA = ls.a;
+//    mB = ls.b;
 }
 
 //y=ax+b
@@ -88,7 +94,6 @@ void LeastSquareWin::paintEvent(QPaintEvent *event)
 
     painter.drawPolyline(posList);
 }
-
 
 std::list<int> LeastSquareWin::findPeaks( const std::vector<double> &amp )
 {
@@ -137,3 +142,20 @@ std::list<int> LeastSquareWin::findPeaks( const std::vector<double> &amp )
    return peakIndexList;
 }
 
+std::pair<double,double> LeastSquareWin::caclLeastSquare(const vector<double>& x, const vector<double>& y)
+{
+    double a,b;
+    double t1=0, t2=0, t3=0, t4=0;
+    for(int i=0; i<x.size(); ++i)
+    {
+        t1 += x[i]*x[i];
+        t2 += x[i];
+        t3 += x[i]*y[i];
+        t4 += y[i];
+    }
+    a = (t3*x.size() - t2*t4) / (t1*x.size() - t2*t2);
+    //b = (t4 - a*t2) / x.size();
+    b = (t1*t4 - t2*t3) / (t1*x.size() - t2*t2);
+
+    return std::pair<double,double>(a,b);
+}
